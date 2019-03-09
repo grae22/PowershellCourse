@@ -30,17 +30,44 @@ function CategoriseFilesByExtension([System.IO.FileInfo[]]$files)
     $filesByExtension = @{}
 
     Foreach ($f in $files)
-    {        
-        if ($filesByExtension.ContainsKey($f.Extension) -eq $false)
+    {
+        $extension = $f.Extension
+
+        if ($extension -eq $null -or $extension.length -eq 0)
         {
-            $list = New-Object 'System.Collections.Generic.List[System.IO.FileInfo]'
-            $filesByExtension.Add($f.Extension, $list)
+            $extension = '_none'
         }
 
-        $filesByExtension[$f.Extension].Add($f)
+        if ($extension[0] -eq '.')
+        {
+            $extension = $extension.Remove(0, 1)
+        }
+
+        if ($filesByExtension.ContainsKey($extension) -eq $false)
+        {
+            $list = New-Object 'System.Collections.Generic.List[System.IO.FileInfo]'
+            $filesByExtension.Add($extension, $list)
+        }
+
+        $filesByExtension[$extension].Add($f)
     }
 
     return $filesByExtension
+}
+
+function CopyFilesToFolder([string]$folderPath, [System.IO.FileInfo[]]$files)
+{
+    if ((CheckFolderExists $folderPath -createIfNotFound) -eq $false)
+    {
+        "ERROR: Failed to find and/or create folder '$folderPath'."
+        return
+    }
+
+    Foreach ($f in $files)
+    {
+        $f.FullName
+        Copy-Item -Path $f.FullName -Destination $folderPath
+    }
 }
 
 # Logic =======================================================================
@@ -74,3 +101,8 @@ if ((CheckFolderExists $destinationFolder -createIfNotFound) -eq $false)
 
 $allFiles = GetAllFiles $sourceFolder
 $filesByExtension = CategoriseFilesByExtension $allFiles
+
+Foreach ($extension in $filesByExtension.Keys)
+{
+    CopyFilesToFolder "$($destinationFolder)\$extension" $filesByExtension[$extension]
+}
