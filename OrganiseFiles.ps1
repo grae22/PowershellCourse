@@ -65,8 +65,19 @@ function CopyFilesToFolder([string]$folderPath, [System.IO.FileInfo[]]$files)
 
     Foreach ($f in $files)
     {
-        $f.FullName
+        Write-Host "$($f.FullName) => $folderPath"
         Copy-Item -Path $f.FullName -Destination $folderPath
+    }
+}
+
+function GenerateReport([string]$path)
+{
+    $folders = Get-ChildItem -Path $path -Directory
+
+    Foreach ($folder in $folders)
+    {
+        $totalSizeInBytes = (Get-ChildItem -Path $folder.FullName -File | Measure-Object -Sum Length).Sum
+        Write-Host "$folder.Name : $totalSizeInBytes"
     }
 }
 
@@ -106,3 +117,5 @@ Foreach ($extension in $filesByExtension.Keys)
 {
     CopyFilesToFolder "$($destinationFolder)\$extension" $filesByExtension[$extension]
 }
+
+GenerateReport $destinationFolder
