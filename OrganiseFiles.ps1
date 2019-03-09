@@ -1,8 +1,6 @@
 ﻿# Params ======================================================================
 
-#param([string]$sourceFolder, [string]$destinationFolder)
-$sourceFolder = 'd:\drivers\'
-$destinationFolder = 'D:\dev\projects\PowershellCourse\Output\'
+param([string]$sourceFolder='d:\drivers\', [string]$destinationFolder='d:\drivers\output\')
 
 # Functions ===================================================================
 
